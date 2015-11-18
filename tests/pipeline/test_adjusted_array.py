@@ -12,18 +12,9 @@ from numpy import (
 from numpy.testing import assert_array_equal
 from six.moves import zip_longest
 
-from zipline.lib.adjustment import (
-    Float64Multiply,
-    Float64Overwrite,
-)
-from zipline.lib.adjusted_array import (
-    adjusted_array,
-    NOMASK,
-)
-from zipline.errors import (
-    WindowLengthNotPositive,
-    WindowLengthTooLong,
-)
+from zipline.lib.adjustment import Float64Multiply, Float64Overwrite
+from zipline.lib.adjusted_array import AdjustedArray, NOMASK
+from zipline.errors import WindowLengthNotPositive, WindowLengthTooLong
 
 
 def num_windows_of_length_M_on_buffers_of_length_N(M, N):
@@ -249,11 +240,7 @@ class AdjustedArrayTestCase(TestCase):
                             lookback,
                             adjustments,
                             expected):
-        array = adjusted_array(
-            data,
-            NOMASK,
-            adjustments,
-        )
+        array = AdjustedArray(data, NOMASK, adjustments)
         for _ in range(2):  # Iterate 2x ensure adjusted_arrays are re-usable.
             window_iter = array.traverse(lookback)
             for yielded, expected_yield in zip_longest(window_iter, expected):
@@ -266,11 +253,8 @@ class AdjustedArrayTestCase(TestCase):
                                         lookback,
                                         adjustments,
                                         expected):
-        array = adjusted_array(
-            data,
-            NOMASK,
-            adjustments,
-        )
+
+        array = AdjustedArray(data, NOMASK, adjustments)
         for _ in range(2):  # Iterate 2x ensure adjusted_arrays are re-usable.
             window_iter = array.traverse(lookback)
             for yielded, expected_yield in zip_longest(window_iter, expected):
@@ -283,11 +267,7 @@ class AdjustedArrayTestCase(TestCase):
                                         lookback,
                                         adjustments,
                                         expected):
-        array = adjusted_array(
-            data,
-            NOMASK,
-            adjustments,
-        )
+        array = AdjustedArray(data, NOMASK, adjustments)
         for _ in range(2):  # Iterate 2x ensure adjusted_arrays are re-usable.
             window_iter = array.traverse(lookback)
             for yielded, expected_yield in zip_longest(window_iter, expected):
@@ -296,7 +276,7 @@ class AdjustedArrayTestCase(TestCase):
     def test_invalid_lookback(self):
 
         data = arange(30, dtype=float).reshape(6, 5)
-        adj_array = adjusted_array(data, NOMASK, {})
+        adj_array = AdjustedArray(data, NOMASK, {})
 
         with self.assertRaises(WindowLengthTooLong):
             adj_array.traverse(7)
@@ -310,7 +290,7 @@ class AdjustedArrayTestCase(TestCase):
     def test_array_views_arent_writable(self):
 
         data = arange(30, dtype=float).reshape(6, 5)
-        adj_array = adjusted_array(data, NOMASK, {})
+        adj_array = AdjustedArray(data, NOMASK, {})
 
         for frame in adj_array.traverse(3):
             with self.assertRaises(ValueError):
@@ -322,4 +302,4 @@ class AdjustedArrayTestCase(TestCase):
         bad_mask = array([[0, 1, 1], [0, 0, 1]], dtype=bool)
 
         with self.assertRaisesRegexp(ValueError, msg):
-            adjusted_array(data, bad_mask, {})
+            AdjustedArray(data, bad_mask, {})

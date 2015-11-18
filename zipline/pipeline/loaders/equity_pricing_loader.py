@@ -16,9 +16,7 @@ from numpy import (
     uint32,
 )
 
-from zipline.lib.adjusted_array import (
-    adjusted_array,
-)
+from zipline.lib.adjusted_array import AdjustedArray
 from zipline.errors import NoFurtherDataError
 
 from .base import PipelineLoader
@@ -62,7 +60,7 @@ class USEquityPricingLoader(PipelineLoader):
             assets,
         )
         adjusted_arrays = [
-            adjusted_array(raw_array, mask, col_adjustments)
+            AdjustedArray(raw_array, mask, col_adjustments)
             for raw_array, col_adjustments in zip(raw_arrays, adjustments)
         ]
 
